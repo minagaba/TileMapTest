@@ -10,6 +10,7 @@ bool TiledMapLayer::init()
 {
 	setTouchEnabled(true);
 	setTouchMode(kCCTouchesOneByOne);
+	setTouchPriority(1);
 
 	// background color
     CCLayerColor* color = CCLayerColor::create( ccc4(64,64,64,255) );
