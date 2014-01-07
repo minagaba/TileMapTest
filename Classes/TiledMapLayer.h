@@ -19,8 +19,17 @@ public:
 
 	virtual void ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent);
 
+	virtual void onEnter();
+
 private:
+	void addDudeWithCoordinates(CCPoint p);
+	void createZoomMenu();
+
+	void zoomIn(CCObject *sender);
+	void zoomOut(CCObject *sender);
+
 	CCTMXTiledMap* m_map;
+	CCMenu *m_pMenu;
 };
 
 #endif // __TILEDMAPLAYER_H__

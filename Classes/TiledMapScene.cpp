@@ -21,8 +21,8 @@ bool TiledMapScene::init()
 		CCLayer *pMapLayer = new TiledMapLayer();
 		this->addChild(pMapLayer);
 
-		CCLayer *pMapAnimationLayer = new TiledMapAnimationLayer();
-		this->addChild(pMapAnimationLayer);
+		//CCLayer *pMapAnimationLayer = new TiledMapAnimationLayer();
+		//this->addChild(pMapAnimationLayer);
 
 		return true;
 	}
