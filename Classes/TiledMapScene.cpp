@@ -1,6 +1,7 @@
 #include "TiledMapScene.h"
 #include "MainMenuScene.h"
 #include "TiledMapLayer.h"
+#include "TiledMapAnimationLayer.h"
 
 TiledMapScene::TiledMapScene()
 {
@@ -19,6 +20,9 @@ bool TiledMapScene::init()
 	{
 		CCLayer *pMapLayer = new TiledMapLayer();
 		this->addChild(pMapLayer);
+
+		CCLayer *pMapAnimationLayer = new TiledMapAnimationLayer();
+		this->addChild(pMapAnimationLayer);
 
 		return true;
 	}

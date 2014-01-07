@@ -14,7 +14,6 @@ MainMenuBackgroundLayer::MainMenuBackgroundLayer()
 	CCSize bgSize = bg1->getContentSize();
     bg1->setPosition( ccp(winSize.width / 2, winSize.height / 2) );
 	bg1->setScale(winSize.height / bgSize.height);
-	//bg1->setScale(0.5f);
     addChild(bg1, -1);
 
 	CCAnimation * animation = CCAnimation::create();

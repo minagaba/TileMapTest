@@ -6,8 +6,6 @@ TiledMapLayer::TiledMapLayer()
 	init();
 }
 
-static int zevel = 0;
-
 bool TiledMapLayer::init()
 {
 	setTouchEnabled(true);
