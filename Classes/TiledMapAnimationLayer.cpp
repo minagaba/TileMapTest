@@ -9,6 +9,10 @@ TiledMapAnimationLayer::TiledMapAnimationLayer()
 
 bool TiledMapAnimationLayer::init()
 {
+	this->setTouchEnabled(true);
+	//setTouchMode(kCCTouchesOneByOne);
+	//this->setTouchPriority(2);
+
 	addDudeWithCoordinates(ccp(200,50));
 
 	return true;
@@ -17,12 +21,34 @@ bool TiledMapAnimationLayer::init()
 void TiledMapAnimationLayer::onEnter()
 {
 	CCLayer::onEnter();
-	this->setTouchEnabled(true);
-	this->setTouchPriority(2);
+}
+
+bool TiledMapAnimationLayer::ccTouchBegan(CCTouch *touch, CCEvent * pEvent)
+{
+	CCLOG("TiledMapAnimationLayer::ccTouchBegan");
+
+	return true;
+}
+
+void TiledMapAnimationLayer::ccTouchEnded(CCTouch *touch, CCEvent * pEvent)
+{
+	CCLOG("TiledMapAnimationLayer::ccTouchEnded");
+}
+
+void TiledMapAnimationLayer::ccTouchCancelled(CCTouch *touch, CCEvent * pEvent)
+{
+	CCLOG("TiledMapAnimationLayer::ccTouchCancelled");
+}
+
+void TiledMapAnimationLayer::ccTouchMoved(CCTouch *touch, CCEvent * pEvent)
+{
+	CCLOG("TiledMapAnimationLayer::ccTouchMoved");
 }
 
 void TiledMapAnimationLayer::ccTouchesEnded(CCSet* touches, CCEvent* event)
 {
+	CCLOG("TiledMapAnimationLayer::ccTouchesEnded");
+
     CCSetIterator it;
     CCTouch* touch;
 
@@ -39,23 +65,22 @@ void TiledMapAnimationLayer::ccTouchesEnded(CCSet* touches, CCEvent* event)
     }
 }
 
-bool TiledMapAnimationLayer::ccTouchBegan(CCTouch *touch, CCEvent * pEvent)
+void TiledMapAnimationLayer::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent)
 {
-	return true;
+	CCLOG("TiledMapAnimationLayer::ccTouchesBegan");
 }
 
-void TiledMapAnimationLayer::ccTouchEnded(CCTouch *touch, CCEvent * pEvent)
+void TiledMapAnimationLayer::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent)
 {
+	CCLOG("TiledMapAnimationLayer::ccTouchesMoved");
 }
 
-void TiledMapAnimationLayer::ccTouchCancelled(CCTouch *touch, CCEvent * pEvent)
+void TiledMapAnimationLayer::ccTouchesCancelled(CCSet *pTouches, CCEvent *pEvent)
 {
+	CCLOG("TiledMapAnimationLayer::ccTouchesCancelled");
 }
 
-void TiledMapAnimationLayer::ccTouchMoved(CCTouch *touch, CCEvent * pEvent)
-{
-}
-
+static int g_nDudesCount = 0;
 void TiledMapAnimationLayer::addDudeWithCoordinates(CCPoint p)
 {
 	CCSprite *pDude = NULL;
@@ -72,6 +97,7 @@ void TiledMapAnimationLayer::addDudeWithCoordinates(CCPoint p)
 	
 	int nNumberOfFrames = 16;
 	float fFrameDelay = 0.05f;
+	float fMoveDuration = nNumberOfFrames * fFrameDelay;
 	CCArray* animFramesArray = CCArray::createWithCapacity(nNumberOfFrames);
 	char szFrameName[16] = {0};
 
@@ -84,9 +110,24 @@ void TiledMapAnimationLayer::addDudeWithCoordinates(CCPoint p)
  
 	CCAnimation *pAnimation = CCAnimation::createWithSpriteFrames(animFramesArray, fFrameDelay);
 
+	float fDudeFacingAngel = g_nDudesCount * 60.0f;
+	float fDudeWalkingAngel = (g_nDudesCount * 60.0f);// + 270;
+
+	CCLOG("Face to: %f", fDudeFacingAngel);
+	CCLOG("Walk to: %f", fDudeWalkingAngel);
+
+	CCRotateTo *pRotate = CCRotateTo::create(0.0f, fDudeFacingAngel);
+	pDude->runAction(pRotate);
+
+	float speed = 10;
+	float dy = cos(fDudeWalkingAngel * M_PI / 180) * speed;
+	float dx = sin(fDudeWalkingAngel * M_PI / 180) * speed;
+	CCLOG("direction=[%f, %f]", dx, dy);
+	CCPoint direction = ccp(dx, dy);
 	// combine move with animation
 	// the duration of the move is the number of frames in the animation * delay for each frame
-	float fMoveDuration = nNumberOfFrames * fFrameDelay;
-	CCActionInterval *pSpawnActions = CCSpawn::create(CCAnimate::create(pAnimation), CCMoveBy::create(fMoveDuration, ccp(0,10)), NULL);
+	CCActionInterval *pSpawnActions = CCSpawn::create(CCAnimate::create(pAnimation), CCMoveBy::create(fMoveDuration, direction), NULL);
 	pDude->runAction( CCRepeatForever::create( pSpawnActions ) );
+
+	g_nDudesCount++;
 }

@@ -14,6 +14,12 @@ public:
 
 	static CCScene* create();
 	void ChangeScene();
+
+	void zoomMapInOut(bool bZoomIn);
+
+private:
+	CCLayer *m_pMapLayer;
+
 };
 
 #endif // __TILEDMAPSCENE_H__

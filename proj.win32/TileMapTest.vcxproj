@@ -133,6 +133,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\..\external\libwebsockets\win32\lib\*.*" "$(OutD
     <ClCompile Include="..\Classes\MainMenuMenuLayer.cpp" />
     <ClCompile Include="..\Classes\MainMenuScene.cpp" />
     <ClCompile Include="..\Classes\TiledMapAnimationLayer.cpp" />
+    <ClCompile Include="..\Classes\TiledMapButtonsLayer.cpp" />
     <ClCompile Include="..\Classes\TiledMapLayer.cpp" />
     <ClCompile Include="..\Classes\TiledMapScene.cpp" />
     <ClCompile Include="main.cpp" />
@@ -144,6 +145,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\..\external\libwebsockets\win32\lib\*.*" "$(OutD
     <ClInclude Include="..\Classes\MainMenuMenuLayer.h" />
     <ClInclude Include="..\Classes\MainMenuScene.h" />
     <ClInclude Include="..\Classes\TiledMapAnimationLayer.h" />
+    <ClInclude Include="..\Classes\TiledMapButtonsLayer.h" />
     <ClInclude Include="..\Classes\TiledMapLayer.h" />
     <ClInclude Include="..\Classes\TiledMapScene.h" />
     <ClInclude Include="main.h" />

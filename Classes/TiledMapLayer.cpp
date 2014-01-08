@@ -18,8 +18,8 @@ void TiledMapLayer::onEnter()
 bool TiledMapLayer::init()
 {
 	setTouchEnabled(true);
-	setTouchMode(kCCTouchesOneByOne);
-	setTouchPriority(1);
+	//setTouchMode(kCCTouchesOneByOne);
+	//setTouchPriority(1);
 
 	// background color
     CCLayerColor* color = CCLayerColor::create( ccc4(64,64,64,255) );
@@ -36,46 +36,16 @@ bool TiledMapLayer::init()
 
 	m_map->setAnchorPoint(ccp(0.5f, 0.5f));
 	m_map->setPosition(winSize.width/2, winSize.height/2);
-	m_map->runAction(CCScaleBy::create(1.0f, winSize.width/mapSize.width, winSize.height/mapSize.height));
+	m_map->runAction(CCScaleBy::create(0.3f, winSize.width/mapSize.width, winSize.height/mapSize.height));
 
-	createZoomMenu();
+	CCLOG("scale by: %f, %f", winSize.width/mapSize.width, winSize.height/mapSize.height);
 
 	return true;
 }
 
-void TiledMapLayer::createZoomMenu()
-{
-	CCSprite *pZoomIn = CCSprite::create(ZOOMIN_BUTTON);
-	CCSprite *pZoomOut = CCSprite::create(ZOOMOUT_BUTTON);
-
-	CCMenuItemSprite *pZoomInButton = CCMenuItemSprite::create(pZoomIn, NULL, NULL, this, menu_selector(TiledMapLayer::zoomIn));
-	CCMenuItemSprite *pZoomOutButton = CCMenuItemSprite::create(pZoomOut, NULL, NULL, this, menu_selector(TiledMapLayer::zoomOut));
-
-	m_pMenu = CCMenu::create(pZoomInButton, pZoomOutButton, NULL);
-	this->addChild(m_pMenu);
-
-	CCSize winSize = CCDirector::sharedDirector()->getWinSize();
-	CCSize menuSize(pZoomIn->getContentSize().width + pZoomOut->getContentSize().width, pZoomIn->getContentSize().height);
-
-	m_pMenu->setAnchorPoint(ccp(0.5f, 0.5f));
-	m_pMenu->alignItemsHorizontally();
-	m_pMenu->setPosition(ccp(winSize.width - (menuSize.width/2), menuSize.height/2));
-}
-
-void TiledMapLayer::zoomIn(CCObject *sender)
-{
-	this->runAction( CCScaleBy::create(0.5f, 1.1f));
-	CCPoint p = m_pMenu->getPosition();
-}
-
-void TiledMapLayer::zoomOut(CCObject *sender)
-{
-	this->runAction( CCScaleBy::create(0.5f, 0.9f));
-	CCPoint p = m_pMenu->getPosition();
-}
-
 bool TiledMapLayer::ccTouchBegan(CCTouch *touch, CCEvent * pEvent)
 {
+	CCLOG("TiledMapLayer::ccTouchBegan");
 	TiledMapScene *pTiledMapScene= (TiledMapScene*)(this->getParent());
 	//pTiledMapScene->ChangeScene();
 
@@ -84,30 +54,69 @@ bool TiledMapLayer::ccTouchBegan(CCTouch *touch, CCEvent * pEvent)
 
 void TiledMapLayer::ccTouchEnded(CCTouch *touch, CCEvent * pEvent)
 {
+	CCLOG("TiledMapLayer::ccTouchEnded");
 	CCPoint location = touch->getLocation();
-	addDudeWithCoordinates(location);
+	//addDudeWithCoordinates(location);
 }
 
 void TiledMapLayer::ccTouchCancelled(CCTouch *touch, CCEvent * pEvent)
 {
+	CCLOG("TiledMapLayer::ccTouchCancelled");
 }
 
 void TiledMapLayer::ccTouchMoved(CCTouch *touch, CCEvent * pEvent)
 {
-	CCPoint diff = touch->getDelta();
-    CCPoint currentPos = getPosition();
-    setPosition( ccpAdd(currentPos, diff) );
+	CCLOG("TiledMapLayer::ccTouchMoved");
+}
 
-	CCPoint newPos = getPosition();
-	CCLOG("Pos = [%f , %f]", newPos.x, newPos.y);
+void TiledMapLayer::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent)
+{
+	CCLOG("TiledMapLayer::ccTouchesBegan");
 }
 
 void TiledMapLayer::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent)
 {
+	CCLOG("TiledMapLayer::ccTouchesMoved");
+
+
+    CCSetIterator it;
+    CCTouch* touch;
+
+    for (it = pTouches->begin(); it != pTouches->end(); it++)
+    {
+        touch = (CCTouch*)(*it);
+
+        if(!touch)
+            break;
+		
+		CCPoint diff = touch->getDelta();
+		CCPoint currentPos = m_map->getPosition();
+		CCLOG("Old Pos: [%f, %f]", currentPos.x, currentPos.y);
+		CCPoint currIGLPos = CCDirector::sharedDirector()->convertToGL(currentPos);
+		CCLOG("IGL Old Pos: [%f, %f]", currIGLPos.x, currIGLPos.y);
+		CCSize layerSize = m_map->boundingBox().size;
+		CCLOG("Layer size: [%f, %f]", layerSize.width, layerSize.height);
+		m_map->setPosition( ccpAdd(currentPos, diff) );
+		
+		CCPoint newPos = m_map->getPosition();
+		CCLOG("New position = [%f , %f]", newPos.x, newPos.y);
+	}
+}
+
+void TiledMapLayer::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent)
+{
+	CCLOG("TiledMapLayer::ccTouchesEnded");
+}
+
+void TiledMapLayer::ccTouchesCancelled(CCSet *pTouches, CCEvent *pEvent)
+{
+	CCLOG("TiledMapLayer::ccTouchesCancelled");
 }
 
 void TiledMapLayer::addDudeWithCoordinates(CCPoint p)
 {
+	return;
+
 	CCSprite *pDude = NULL;
 
 	CCSpriteBatchNode* pSpriteBatch = CCSpriteBatchNode::create("Dude/dude.png");
