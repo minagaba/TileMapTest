@@ -24,10 +24,15 @@ public:
 
 	virtual void onEnter();
 
+	void increaseScale(float scaleDiff = 0.1f);
+	void decreaseScale(float scaleDiff = 0.1f);
+	void scaleTo(float scale);
+
 private:
 	void addDudeWithCoordinates(CCPoint p);
 
 	CCTMXTiledMap* m_map;
+	float          m_fScaleFactor;
 };
 
 #endif // __TILEDMAPLAYER_H__

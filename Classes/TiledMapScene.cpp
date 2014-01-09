@@ -44,6 +44,17 @@ void TiledMapScene::ChangeScene()
 
 void TiledMapScene::zoomMapInOut(bool bZoomIn)
 {
-	float fScale = (bZoomIn) ? 1.1f : 0.9f;
-	m_pMapLayer->runAction( CCScaleBy::create(0.5f, fScale));
+	TiledMapLayer *pMapLayer = (TiledMapLayer *)m_pMapLayer;
+
+	if (bZoomIn) 
+	{
+		pMapLayer->increaseScale();
+	} 
+	else 
+	{
+		pMapLayer->decreaseScale();
+	}
+	//float fScale = (bZoomIn) ? 1.1f : 0.9f;
+	//m_pMapLayer->runAction( CCScaleBy::create(0.5f, fScale));
+	
 }

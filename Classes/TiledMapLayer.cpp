@@ -36,11 +36,33 @@ bool TiledMapLayer::init()
 
 	m_map->setAnchorPoint(ccp(0.5f, 0.5f));
 	m_map->setPosition(winSize.width/2, winSize.height/2);
-	m_map->runAction(CCScaleBy::create(0.3f, winSize.width/mapSize.width, winSize.height/mapSize.height));
-
+	m_fScaleFactor = (winSize.width/mapSize.width < winSize.height/mapSize.height) ? winSize.width/mapSize.width : winSize.height/mapSize.height;
 	CCLOG("scale by: %f, %f", winSize.width/mapSize.width, winSize.height/mapSize.height);
+	CCLOG("scale factor: %f", m_fScaleFactor);
+	scaleTo(m_fScaleFactor);
+	//m_map->runAction(CCScaleBy::create(0.3f, winSize.width/mapSize.width, winSize.height/mapSize.height));
+
 
 	return true;
+}
+
+void TiledMapLayer::increaseScale(float scaleDiff)
+{
+	float scale = m_fScaleFactor * (1 + scaleDiff);
+	scaleTo(scale);
+}
+
+void TiledMapLayer::decreaseScale(float scaleDiff)
+{
+	float scale = m_fScaleFactor * (1 - scaleDiff);
+	scaleTo(scale);
+}
+
+void TiledMapLayer::scaleTo(float scale)
+{
+	m_fScaleFactor = scale;
+	CCScaleTo *pScale = CCScaleTo::create(0.3f, m_fScaleFactor);
+	m_map->runAction(pScale);
 }
 
 bool TiledMapLayer::ccTouchBegan(CCTouch *touch, CCEvent * pEvent)
@@ -72,6 +94,14 @@ void TiledMapLayer::ccTouchMoved(CCTouch *touch, CCEvent * pEvent)
 void TiledMapLayer::ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent)
 {
 	CCLOG("TiledMapLayer::ccTouchesBegan");
+
+	CCTouch *touch = (CCTouch *)pTouches->anyObject();
+	CCPoint p1 = touch->getLocation();
+	CCPoint p2 = touch->getLocationInView();
+	CCLOG("location: [%f, %f], location in view: [%f, %f]", p1.x, p1.y, p2.x, p2.y);
+	p1 = ccp(p1.x * m_fScaleFactor, p1.y * m_fScaleFactor);
+	p2 = ccp(p2.x * m_fScaleFactor, p2.y * m_fScaleFactor);
+	CCLOG("scaled location: [%f, %f], location in view: [%f, %f]", p1.x, p1.y, p2.x, p2.y);
 }
 
 void TiledMapLayer::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent)
@@ -91,16 +121,19 @@ void TiledMapLayer::ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent)
 		
 		CCPoint diff = touch->getDelta();
 		CCPoint currentPos = m_map->getPosition();
-		CCLOG("Old Pos: [%f, %f]", currentPos.x, currentPos.y);
-		CCPoint currIGLPos = CCDirector::sharedDirector()->convertToGL(currentPos);
-		CCLOG("IGL Old Pos: [%f, %f]", currIGLPos.x, currIGLPos.y);
+		//CCLOG("Old Pos: [%f, %f]", currentPos.x, currentPos.y);
 		CCSize layerSize = m_map->boundingBox().size;
-		CCLOG("Layer size: [%f, %f]", layerSize.width, layerSize.height);
+		//CCLOG("Layer size: [%f, %f]", layerSize.width, layerSize.height);
 		m_map->setPosition( ccpAdd(currentPos, diff) );
 		
 		CCPoint newPos = m_map->getPosition();
-		CCLOG("New position = [%f , %f]", newPos.x, newPos.y);
+		//CCLOG("New position = [%f , %f]", newPos.x, newPos.y);
 	}
+
+	// check if the layer is off screen (if so, then move it back)
+	CCPoint pos = m_map->getPosition();
+	CCPoint anchor = m_map->getAnchorPoint();
+	//CCLOG("pos=[%f,%f], anchor=[%f,%f]", pos.x, pos.y, anchor.x, anchor.y);
 }
 
 void TiledMapLayer::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent)
