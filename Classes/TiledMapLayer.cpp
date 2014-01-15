@@ -34,12 +34,12 @@ bool TiledMapLayer::init()
 	CCLOG("Map Size=[%f x %f]", mapSize.width, mapSize.height);
 	CCLOG("Win Size=[%f x %f]", winSize.width, winSize.height);
 
-	m_map->setAnchorPoint(ccp(0.5f, 0.5f));
-	m_map->setPosition(winSize.width/2, winSize.height/2);
-	m_fScaleFactor = (winSize.width/mapSize.width < winSize.height/mapSize.height) ? winSize.width/mapSize.width : winSize.height/mapSize.height;
+	m_fScaleFactor = (winSize.width/mapSize.width > winSize.height/mapSize.height) ? winSize.width/mapSize.width : winSize.height/mapSize.height;
 	CCLOG("scale by: %f, %f", winSize.width/mapSize.width, winSize.height/mapSize.height);
 	CCLOG("scale factor: %f", m_fScaleFactor);
 	scaleTo(m_fScaleFactor);
+	m_map->setAnchorPoint(ccp(0.5f, 0.5f));
+	m_map->setPosition(winSize.width/2, winSize.height/2);
 	//m_map->runAction(CCScaleBy::create(0.3f, winSize.width/mapSize.width, winSize.height/mapSize.height));
 
 
