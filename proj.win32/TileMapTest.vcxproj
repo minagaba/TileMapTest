@@ -129,6 +129,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\..\external\libwebsockets\win32\lib\*.*" "$(OutD
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
+    <ClCompile Include="..\Classes\HexagonMapLayer.cpp" />
     <ClCompile Include="..\Classes\MainMenuBackgroundLayer.cpp" />
     <ClCompile Include="..\Classes\MainMenuMenuLayer.cpp" />
     <ClCompile Include="..\Classes\MainMenuScene.cpp" />
@@ -141,6 +142,7 @@ xcopy /Y /Q "$(ProjectDir)..\..\..\external\libwebsockets\win32\lib\*.*" "$(OutD
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
+    <ClInclude Include="..\Classes\HexagonMapLayer.h" />
     <ClInclude Include="..\Classes\MainMenuBackgroundLayer.h" />
     <ClInclude Include="..\Classes\MainMenuMenuLayer.h" />
     <ClInclude Include="..\Classes\MainMenuScene.h" />

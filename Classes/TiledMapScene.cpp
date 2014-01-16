@@ -3,6 +3,7 @@
 #include "TiledMapLayer.h"
 #include "TiledMapAnimationLayer.h"
 #include "TiledMapButtonsLayer.h"
+#include "HexagonMapLayer.h"
 
 TiledMapScene::TiledMapScene()
 {
@@ -23,8 +24,15 @@ bool TiledMapScene::init()
 		this->addChild(pMapLayer);
 		m_pMapLayer = pMapLayer;
 
-		//CCLayer *pMapAnimationLayer = new TiledMapAnimationLayer();
-		//this->addChild(pMapAnimationLayer);
+		/*
+		CCLayer *pHexagonMapLayer = new HexagonMapLayer();
+		this->addChild(pHexagonMapLayer);
+		m_pMapLayer = pHexagonMapLayer;
+		*/
+		
+		CCLayer *pMapAnimationLayer = new TiledMapAnimationLayer();
+		this->addChild(pMapAnimationLayer);
+		
 
 		CCLayer *pButtonsLayer = new TiledMapButtonsLayer();
 		this->addChild(pButtonsLayer);

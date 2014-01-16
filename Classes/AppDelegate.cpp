@@ -1,5 +1,6 @@
 #include "AppDelegate.h"
 #include "MainMenuScene.h"
+#include "TiledMapScene.h"
 
 USING_NS_CC;
 
@@ -26,6 +27,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 
     // create a scene. it's an autorelease object
     CCScene *pScene = MainMenuScene::create();
+	//CCScene *pScene = TiledMapScene::create();
 
     // run
     pDirector->runWithScene(pScene);
