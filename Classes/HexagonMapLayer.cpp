@@ -1,7 +1,12 @@
 #include "HexagonMapLayer.h"
 
+#define HEXAGON_MAPS_WIDTH_FACTOR 0.75f
+
+#define LOG_CCPOINT(arg) CCLOG(#arg": [%f, %f]", arg.x, arg.y)
+
 HexagonMapLayer::HexagonMapLayer()
 {
+	m_fScaleFactor = 1.0f;
 }
 
 
@@ -49,10 +54,22 @@ bool HexagonMapLayer::init()
 	CCLOG("MapCenter from tmx: [%d, %d]", x, y);
 
 	createDudeWithCoordinates(ccp(x,y));
-	setViewPointCenter(ccp(x,y));
+	//setViewPointCenter(ccp(x,y));
 
 	this->setTouchEnabled(true);
 
+	CCSize layerSize = this->getContentSize();
+	CCSize mapSize = m_pTiledMap->getContentSize();
+
+	// center the map within the layer
+	m_pTiledMap->setAnchorPoint(ccp(0.5f * HEXAGON_MAPS_WIDTH_FACTOR, 0.5f));
+	m_pTiledMap->setPosition(ccp(layerSize.width/2, layerSize.height/2));
+
+	// scale the map to fit the layer
+	float scale = layerSize.height / mapSize.height;
+	scaleTo(scale);
+
+	moveMapView(ccp(0,0));
 	return true;
 }
 
@@ -64,7 +81,9 @@ void HexagonMapLayer::createDudeWithCoordinates(CCPoint location)
 	m_pDudeSprite = CCSprite::createWithSpriteFrameName("00");
 	m_pAnimatedDude->addChild(m_pDudeSprite);
 	m_pAnimatedDude->setPosition(location);
-	this->addChild(m_pAnimatedDude);
+
+	m_pTiledMap->addChild(m_pAnimatedDude);
+	//this->addChild(m_pAnimatedDude);
 
 	int nNumberOfFrames = 16;
 	float fFrameDelay = 0.05f;
@@ -88,13 +107,13 @@ void HexagonMapLayer::setViewPointCenter(CCPoint position)
  
     int x = MAX(position.x, winSize.width/2);
     int y = MAX(position.y, winSize.height/2);
-    x = MIN(x, (m_pTiledMap->getMapSize().width * this->m_pTiledMap->getTileSize().width) - winSize.width / 2);
+    x = MIN(x, (m_pTiledMap->getMapSize().width * m_pTiledMap->getTileSize().width) - winSize.width / 2);
     y = MIN(y, (m_pTiledMap->getMapSize().height * m_pTiledMap->getTileSize().height) - winSize.height/2);
     CCPoint actualPosition = ccp(x, y);
  
     CCPoint centerOfView = ccp(winSize.width/2, winSize.height/2);
     CCPoint viewPoint = ccpSub(centerOfView, actualPosition);
-    this->setPosition(viewPoint);
+    m_pTiledMap->setPosition(viewPoint);
 }
 
 void HexagonMapLayer::registerWithTouchDispatcher() {
@@ -108,9 +127,12 @@ bool HexagonMapLayer::ccTouchBegan(CCTouch *touch, CCEvent *event)
 
 void HexagonMapLayer::ccTouchEnded(CCTouch *touch, CCEvent *event)
 {
+	return;
     CCPoint touchLocation = touch->getLocationInView();
     touchLocation = CCDirector::sharedDirector()->convertToGL(touchLocation);
-    touchLocation = this->convertToNodeSpace(touchLocation);
+    //touchLocation = this->convertToNodeSpace(touchLocation);
+	touchLocation = m_pTiledMap->convertToNodeSpace(touchLocation);
+	pixelToHexagonGrid(touchLocation);
  
 	CCPoint playerPos = m_pAnimatedDude->getPosition();
     CCPoint diff = ccpSub(touchLocation, playerPos);
@@ -141,6 +163,143 @@ void HexagonMapLayer::ccTouchEnded(CCTouch *touch, CCEvent *event)
     this->setViewPointCenter(m_pAnimatedDude->getPosition());
 }
 
-void HexagonMapLayer::setDudePosition(CCPoint position) {
-    m_pAnimatedDude->setPosition(position);
+void HexagonMapLayer::ccTouchMoved(CCTouch *touch, CCEvent *event)
+{
+	CCLOG("HexagonMapLayer::ccTouchMoved");
+	CCPoint location = touch->getLocationInView();
+	CCLOG("move: location in view [%f, %f]", location.x, location.y);
+
+	CCPoint diff = touch->getDelta();
+	CCLOG("move: diff [%f, %f]", diff.x, diff.y);
+
+	moveMapView(diff);
+}
+
+void HexagonMapLayer::moveMapView(CCPoint diff)
+{
+	CCPoint currPosition = m_pTiledMap->getPosition();
+	CCLOG("move: curr [%f, %f]", currPosition.x, currPosition.y);
+
+	CCPoint newPosition = ccpAdd(currPosition, diff);
+	CCLOG("move: new [%f, %f]", newPosition.x, newPosition.y);
+	/*
+	// make sure the new position does not move outside of layer
+	CCSize layerSize = this->getContentSize();
+	CCLOG("move: layerSize [%f, %f]", layerSize.width, layerSize.height);
+
+	CCSize mapSize = m_pTiledMap->getContentSize();
+	//mapSize.width *= HEXAGON_MAPS_WIDTH_FACTOR;
+	CCLOG("move: mapSize [%f, %f]", mapSize.width, mapSize.height);
+	float scale = m_pTiledMap->getScale();
+	CCLOG("move: scaled mapSize [%f, %f]", scale * mapSize.width, scale * mapSize.height);
+	CCPoint anchor = m_pTiledMap->getAnchorPoint();
+	CCLOG("move: anchor [%f, %f]", anchor.x, anchor.y);
+
+	CCPoint centerOfView = ccp(layerSize.width/2, layerSize.height/2);
+	CCPoint converted = m_pTiledMap->convertToNodeSpace(newPosition);
+	CCLOG("move: converted [%f, %f]", converted.x, converted.y);
+	CCPoint leftBottom = ccpSub(newPosition, centerOfView);
+	CCLOG("move: leftBottom [%f, %f]", leftBottom.x, leftBottom.y);
+	CCPoint rightTop = ccpAdd(newPosition, centerOfView);
+	CCLOG("move: rightTop [%f, %f]", rightTop.x, rightTop.y);
+	float left = mapSize.width * scale * anchor.x - newPosition.x;
+	CCLOG("left: %f", left);
+	float right = (mapSize.width * scale * (1.0f - anchor.x)) + layerSize.width - newPosition.x;
+	CCLOG("right: %f", right);
+	float bottom = mapSize.height * scale * anchor.y - newPosition.y;
+	CCLOG("bottom: %f", bottom);
+	*/
+	//if (left > 0 && bottom > 0)
+	{
+		m_pTiledMap->setPosition(newPosition);
+	}
+
+	fixMapPosition();
+}
+
+void HexagonMapLayer::fixMapPosition()
+{
+	CCLOG("HexagonMapLayer::fixMapPosition()");
+	CCPoint position = m_pTiledMap->getPosition();
+	LOG_CCPOINT(position);
+	CCPoint convertedPos = m_pTiledMap->convertToNodeSpace(position);
+	LOG_CCPOINT(convertedPos);
+	CCSize layerSize = this->getContentSize();
+	CCPoint centerOfView = ccp(layerSize.width/2, layerSize.height/2);
+	LOG_CCPOINT(centerOfView);
+
+	CCPoint bottomLeft = ccpSub(position, centerOfView);
+	LOG_CCPOINT(bottomLeft);
+	CCPoint topRight = ccpAdd(position, centerOfView);
+	LOG_CCPOINT(topRight);
+
+	CCPoint convertedBL = m_pTiledMap->convertToNodeSpace(bottomLeft);
+	LOG_CCPOINT(convertedBL);
+	CCPoint convertedTR = m_pTiledMap->convertToNodeSpace(topRight);
+	LOG_CCPOINT(convertedTR);
+}
+
+void HexagonMapLayer::setDudePosition(CCPoint position) 
+{
+	CCMoveTo *pMove = CCMoveTo::create(0.3f, position);
+	m_pAnimatedDude->runAction(pMove);
+    //m_pAnimatedDude->setPosition(position);
+}
+
+void HexagonMapLayer::increaseScale(float scaleDiff)
+{
+	float scale = m_fScaleFactor * (1 + scaleDiff);
+	scaleTo(scale);
+}
+
+void HexagonMapLayer::decreaseScale(float scaleDiff)
+{
+	float scale = m_fScaleFactor * (1 - scaleDiff);
+	scaleTo(scale);
+}
+
+void HexagonMapLayer::scaleTo(float scale)
+{
+	CCLOG("HexagonMapLayer::scaleTo %f", scale);
+	m_fScaleFactor = scale;
+	CCScaleTo *pScale = CCScaleTo::create(0.5f, m_fScaleFactor);
+	m_pTiledMap->runAction(pScale);
+	//this->runAction(pScale);
+
+	fixMapPosition();
+}
+
+CCPoint HexagonMapLayer::pixelToHexagonGrid(CCPoint p)
+{
+	CCPoint xy;
+
+	CCSize layerSize = this->getContentSize();
+	CCLOG("layerSize: [%f, %f]", layerSize.width, layerSize.height);
+
+	float tileWidth = m_pTiledMap->getTileSize().width;
+	float tileHeight = m_pTiledMap->getTileSize().height;
+
+	float rows = m_pTiledMap->getMapSize().height;
+	float cols = m_pTiledMap->getMapSize().width;
+
+	CCLOG("map rows,cols = [%f, %f]", rows, cols);
+	CCLOG("tile: [%f x %f] pixels", tileWidth, tileHeight);
+	CCLOG("map: [%f, %f] pixels", cols*tileWidth, rows*tileHeight);
+	CCLOG("clicked at: [%f, %f]", p.x, p.y);
+
+
+	int tileRow = (int) p.y / (int) tileHeight;
+	int tileCol;
+	if (tileRow & 1) 
+	{
+		tileCol = (int) (p.x + (tileWidth / 2 )) / tileWidth;
+	} else {
+		tileCol = (int) p.x / (int) tileWidth;
+	}
+	CCLOG("tile: row col = [%d, %d]", tileRow, tileCol);
+
+	//m_pBackgroundLayer->removeTileAt(ccp(tileRow, tileCol));
+	//m_pBackgroundLayer->removeChildAtIndex
+
+	return xy;
 }

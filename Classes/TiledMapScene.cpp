@@ -20,19 +20,20 @@ bool TiledMapScene::init()
 {
 	if (CCScene::init()) 
 	{
+		/*
 		CCLayer *pMapLayer = new TiledMapLayer();
 		this->addChild(pMapLayer);
 		m_pMapLayer = pMapLayer;
+		*/
 
-		/*
 		CCLayer *pHexagonMapLayer = new HexagonMapLayer();
 		this->addChild(pHexagonMapLayer);
 		m_pMapLayer = pHexagonMapLayer;
-		*/
-		
+
+		/*
 		CCLayer *pMapAnimationLayer = new TiledMapAnimationLayer();
 		this->addChild(pMapAnimationLayer);
-		
+		*/
 
 		CCLayer *pButtonsLayer = new TiledMapButtonsLayer();
 		this->addChild(pButtonsLayer);
@@ -52,7 +53,8 @@ void TiledMapScene::ChangeScene()
 
 void TiledMapScene::zoomMapInOut(bool bZoomIn)
 {
-	TiledMapLayer *pMapLayer = (TiledMapLayer *)m_pMapLayer;
+	//TiledMapLayer *pMapLayer = (TiledMapLayer *)m_pMapLayer;
+	HexagonMapLayer *pMapLayer = (HexagonMapLayer *)m_pMapLayer;
 
 	if (bZoomIn) 
 	{
