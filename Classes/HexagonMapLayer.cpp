@@ -3,6 +3,7 @@
 #define HEXAGON_MAPS_WIDTH_FACTOR 0.75f
 
 #define LOG_CCPOINT(arg) CCLOG(#arg": [%f, %f]", arg.x, arg.y)
+#define LOG_FLOAT(arg)   CCLOG(#arg": %f", arg)
 
 HexagonMapLayer::HexagonMapLayer()
 {
@@ -67,7 +68,8 @@ bool HexagonMapLayer::init()
 
 	// scale the map to fit the layer
 	float scale = layerSize.height / mapSize.height;
-	scaleTo(scale);
+	scaleTo(scale*2);
+	//scaleTo(1.0f);
 
 	moveMapView(ccp(0,0));
 	return true;
@@ -182,61 +184,57 @@ void HexagonMapLayer::moveMapView(CCPoint diff)
 
 	CCPoint newPosition = ccpAdd(currPosition, diff);
 	CCLOG("move: new [%f, %f]", newPosition.x, newPosition.y);
-	/*
-	// make sure the new position does not move outside of layer
-	CCSize layerSize = this->getContentSize();
-	CCLOG("move: layerSize [%f, %f]", layerSize.width, layerSize.height);
 
-	CCSize mapSize = m_pTiledMap->getContentSize();
-	//mapSize.width *= HEXAGON_MAPS_WIDTH_FACTOR;
-	CCLOG("move: mapSize [%f, %f]", mapSize.width, mapSize.height);
-	float scale = m_pTiledMap->getScale();
-	CCLOG("move: scaled mapSize [%f, %f]", scale * mapSize.width, scale * mapSize.height);
-	CCPoint anchor = m_pTiledMap->getAnchorPoint();
-	CCLOG("move: anchor [%f, %f]", anchor.x, anchor.y);
-
-	CCPoint centerOfView = ccp(layerSize.width/2, layerSize.height/2);
-	CCPoint converted = m_pTiledMap->convertToNodeSpace(newPosition);
-	CCLOG("move: converted [%f, %f]", converted.x, converted.y);
-	CCPoint leftBottom = ccpSub(newPosition, centerOfView);
-	CCLOG("move: leftBottom [%f, %f]", leftBottom.x, leftBottom.y);
-	CCPoint rightTop = ccpAdd(newPosition, centerOfView);
-	CCLOG("move: rightTop [%f, %f]", rightTop.x, rightTop.y);
-	float left = mapSize.width * scale * anchor.x - newPosition.x;
-	CCLOG("left: %f", left);
-	float right = (mapSize.width * scale * (1.0f - anchor.x)) + layerSize.width - newPosition.x;
-	CCLOG("right: %f", right);
-	float bottom = mapSize.height * scale * anchor.y - newPosition.y;
-	CCLOG("bottom: %f", bottom);
-	*/
-	//if (left > 0 && bottom > 0)
-	{
-		m_pTiledMap->setPosition(newPosition);
-	}
+	m_pTiledMap->setPosition(newPosition);
 
 	fixMapPosition();
 }
 
 void HexagonMapLayer::fixMapPosition()
 {
-	CCLOG("HexagonMapLayer::fixMapPosition()");
+	CCLOG("*** HexagonMapLayer::fixMapPosition()");
+
 	CCPoint position = m_pTiledMap->getPosition();
 	LOG_CCPOINT(position);
-	CCPoint convertedPos = m_pTiledMap->convertToNodeSpace(position);
-	LOG_CCPOINT(convertedPos);
+
 	CCSize layerSize = this->getContentSize();
 	CCPoint centerOfView = ccp(layerSize.width/2, layerSize.height/2);
 	LOG_CCPOINT(centerOfView);
 
-	CCPoint bottomLeft = ccpSub(position, centerOfView);
-	LOG_CCPOINT(bottomLeft);
-	CCPoint topRight = ccpAdd(position, centerOfView);
-	LOG_CCPOINT(topRight);
+	CCPoint anchor = m_pTiledMap->getAnchorPoint();
+	float mapWidth = m_fScaleFactor * m_pTiledMap->getContentSize().width * HEXAGON_MAPS_WIDTH_FACTOR;
+	float mapHeight = m_fScaleFactor * m_pTiledMap->getContentSize().height;
+	LOG_FLOAT(mapWidth);
+	LOG_FLOAT(mapHeight);
 
-	CCPoint convertedBL = m_pTiledMap->convertToNodeSpace(bottomLeft);
-	LOG_CCPOINT(convertedBL);
-	CCPoint convertedTR = m_pTiledMap->convertToNodeSpace(topRight);
-	LOG_CCPOINT(convertedTR);
+	//  if map is too small then need to enlarge it
+	if (mapWidth < layerSize.width) 
+	{
+		float mapw = HEXAGON_MAPS_WIDTH_FACTOR * m_pTiledMap->getContentSize().width;
+		scaleTo(layerSize.width / mapw);
+	} else if (mapHeight < layerSize.height) {
+		scaleTo(layerSize.height / m_pTiledMap->getContentSize().height);
+	}
+
+	CCPoint fixedPosition = position;
+	if ((fixedPosition.x - m_fScaleFactor * m_pTiledMap->getContentSize().width * anchor.x) > 0) {
+		fixedPosition.x = m_fScaleFactor * m_pTiledMap->getContentSize().width * anchor.x;
+	}
+	if ((fixedPosition.y - m_fScaleFactor * m_pTiledMap->getContentSize().height * anchor.y) > 0) {
+		fixedPosition.y = m_fScaleFactor * m_pTiledMap->getContentSize().height * anchor.y;
+	}
+	float rightDiff = fixedPosition.x + m_fScaleFactor * m_pTiledMap->getContentSize().width * (HEXAGON_MAPS_WIDTH_FACTOR - anchor.x) - layerSize.width;
+	if (rightDiff < 0)
+	{
+		fixedPosition.x -= rightDiff;
+	}
+	float topDiff = fixedPosition.y + m_fScaleFactor * m_pTiledMap->getContentSize().height * (1 - anchor.y) - layerSize.height;
+	if (topDiff < 0) 
+	{
+		fixedPosition.y -= topDiff;
+	}
+
+	m_pTiledMap->setPosition(fixedPosition);
 }
 
 void HexagonMapLayer::setDudePosition(CCPoint position) 
@@ -262,7 +260,7 @@ void HexagonMapLayer::scaleTo(float scale)
 {
 	CCLOG("HexagonMapLayer::scaleTo %f", scale);
 	m_fScaleFactor = scale;
-	CCScaleTo *pScale = CCScaleTo::create(0.5f, m_fScaleFactor);
+	CCScaleTo *pScale = CCScaleTo::create(0.2f, m_fScaleFactor);
 	m_pTiledMap->runAction(pScale);
 	//this->runAction(pScale);
 
