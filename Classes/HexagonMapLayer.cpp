@@ -39,8 +39,6 @@ bool HexagonMapLayer::init()
 
 	this->addChild(m_pTiledMap);
 
-	//CCSpriteBatchNode* pSpriteBatch = CCSpriteBatchNode::create("Dude/dude.png");
-	//CCSpriteFrameCache* pCache = CCSpriteFrameCache::sharedSpriteFrameCache();
 	CCTMXObjectGroup *objectGroup = m_pTiledMap->objectGroupNamed("Objects");
 	if(objectGroup == NULL)
 	{
@@ -72,6 +70,10 @@ bool HexagonMapLayer::init()
 	//scaleTo(1.0f);
 
 	moveMapView(ccp(0,0));
+
+	m_pDrawNode = CCDrawNode::create();
+	m_pTiledMap->addChild(m_pDrawNode);
+
 	return true;
 }
 
@@ -127,8 +129,61 @@ bool HexagonMapLayer::ccTouchBegan(CCTouch *touch, CCEvent *event)
     return true;
 }
 
+CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
+{
+	CCPoint touchLocation = touch->getLocationInView();
+	touchLocation = CCDirector::sharedDirector()->convertToGL(touchLocation);
+	CCLOG("touch on screen [%f, %f]", touchLocation.x, touchLocation.y);
+	touchLocation = m_pTiledMap->convertToNodeSpace(touchLocation);
+	CCLOG("touch on map [%f, %f]", touchLocation.x, touchLocation.y);
+
+	CCSize tileSize = m_pTiledMap->getTileSize();
+	CCSize mapSize = m_pTiledMap->getContentSize();
+
+	CCPoint top = ccp(touchLocation.x, mapSize.height);
+	CCPoint bottom = ccp(touchLocation.x, 0);
+	CCPoint left = ccp(0, touchLocation.y);
+	CCPoint right = ccp(mapSize.width, touchLocation.y);
+	ccColor4F touchLocationColor = ccc4f(1.0f, 0.0f, 0.0f, 1.0f);
+	m_pDrawNode->clear();
+	m_pDrawNode->drawSegment(top, bottom, 2.0f, touchLocationColor);
+	m_pDrawNode->drawSegment(left, right, 2.0f, touchLocationColor);
+
+	ccColor4F gridColor = ccc4f(0.0f, 0.0f, 1.0f, 1.0f);
+	float gridLeft, gridRight, gridUp, gridBottom;
+	int col, row;
+	col = (int)(touchLocation.x / (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR));
+	if (col & 1) 
+	{
+		row = (int)((touchLocation.y - (tileSize.height/2)) / tileSize.height);
+	} else {
+		row = (int)(touchLocation.y / tileSize.height);
+	}
+	CCLOG("col=%d", col);
+	CCLOG("row=%d", row);
+	gridLeft = col * (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR);
+	gridRight = gridLeft + (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR);
+
+	gridBottom = row * tileSize.height;
+	if (col & 1) {
+		gridBottom -= (tileSize.height/2);
+	}
+	gridUp = gridBottom + tileSize.height;
+
+	m_pDrawNode->drawSegment(ccp(gridLeft, gridBottom), ccp(gridLeft, gridUp), 2.0f, gridColor);
+	m_pDrawNode->drawSegment(ccp(gridRight, gridBottom), ccp(gridRight, gridUp), 2.0f, gridColor);
+	m_pDrawNode->drawSegment(ccp(gridLeft, gridBottom), ccp(gridRight, gridBottom), 2.0f, gridColor);
+	m_pDrawNode->drawSegment(ccp(gridLeft, gridUp), ccp(gridRight, gridUp), 2.0f, gridColor);
+
+
+	CCPoint coords = ccp(col, row);
+
+	return coords;
+}
+
 void HexagonMapLayer::ccTouchEnded(CCTouch *touch, CCEvent *event)
 {
+	getMapCoordsFromTouch(touch);
 	return;
     CCPoint touchLocation = touch->getLocationInView();
     touchLocation = CCDirector::sharedDirector()->convertToGL(touchLocation);

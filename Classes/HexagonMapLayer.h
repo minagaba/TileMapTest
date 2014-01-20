@@ -28,6 +28,7 @@ private:
 	void createDudeWithCoordinates(CCPoint location);
 	void setViewPointCenter(CCPoint position);
 	void setDudePosition(CCPoint position);
+	CCPoint getMapCoordsFromTouch(CCTouch *touch);
 
 	CCPoint pixelToHexagonGrid(CCPoint p);
 	//void highlightTile(CCPoint position);
@@ -41,6 +42,8 @@ private:
 	CCSprite          *m_pDudeSprite;
 
 	float          m_fScaleFactor;
+
+	CCDrawNode    *m_pDrawNode;
 };
 
 #endif // __HEXAGONMAPLAYER_H__
