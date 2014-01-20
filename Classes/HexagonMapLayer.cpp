@@ -162,11 +162,12 @@ CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 	CCLOG("col=%d", col);
 	CCLOG("row=%d", row);
 	gridLeft = col * (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR);
-	gridRight = gridLeft + (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR);
+	//gridRight = gridLeft + (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR);
+	gridRight = gridLeft + tileSize.width;
 
 	gridBottom = row * tileSize.height;
 	if (col & 1) {
-		gridBottom -= (tileSize.height/2);
+		gridBottom += (tileSize.height/2);
 	}
 	gridUp = gridBottom + tileSize.height;
 
