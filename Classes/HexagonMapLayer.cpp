@@ -152,7 +152,7 @@ CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 	ccColor4F gridColor = ccc4f(0.0f, 0.0f, 1.0f, 1.0f);
 	float gridLeft, gridRight, gridUp, gridBottom;
 	int col, row;
-	col = (int)(touchLocation.x / (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR));
+	col = (int)((touchLocation.x - tileSize.width/8) / (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR));
 	if (col & 1) 
 	{
 		row = (int)((touchLocation.y - (tileSize.height/2)) / tileSize.height);
@@ -161,9 +161,9 @@ CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 	}
 	CCLOG("col=%d", col);
 	CCLOG("row=%d", row);
-	gridLeft = col * (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR);
+	gridLeft = col * (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR) + (tileSize.width / 8);
 	//gridRight = gridLeft + (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR);
-	gridRight = gridLeft + tileSize.width;
+	gridRight = gridLeft + tileSize.width - (tileSize.width / 4);
 
 	gridBottom = row * tileSize.height;
 	if (col & 1) {
