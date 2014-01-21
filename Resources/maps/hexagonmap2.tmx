@@ -4,17 +4,25 @@
  <tileset name="BackgroundTiles" firstgid="1" tilewidth="64" tileheight="64">
   <image source="tiles.png"/>
  </tileset>
+ <tileset name="Highlighted" firstgid="13" tilewidth="64" tileheight="64">
+  <image source="highlighted-tile.png"/>
+ </tileset>
  <!-- Layer data is compressed (GZip) binary data, encoded in Base64 -->
  <layer name="Background" width="96" height="48">
   <data encoding="base64" compression="gzip">
    H4sIAAAAAAAAAO1b227rMAxL163X/f/3ng1YAI0jKdpJtpfzYLiN3bSlJIqS27dlWd5gXMi10T3JPf6Pn+P5Md7DPQrjS3CPz3H643mv4XBw61v2Kzsl9qv4f44XM78067Pz3v56/hivZV6vp3iM7t86PnG4fo1bmVd81uc3WN9r3hID54Lz+vz+MR5fc107Ks7U4xT7l4JtjYMrXK/72Ej21L1o5/R71+94Lzij369rj0lcu/hwj9OBvn0j104LtwXjEtzj7Ivr6fdGjC5gh9cvzJ3vM5wZfkdqF+avjKOrnzpbOI6q169k3/peCf7v5FrlnMfyPQ4SnDs/39sWCkfH1Ygdw7fjpBPZM8NDbCD/VPy3YudsNnNv9PMruYb4jfJ7tafiJ2aHWYwq/1T8Uw2ucHX4PidscFq+87DiDMSv2kjxFosLjDUVN/UzjeBT/X/ln8pF1Q6j/p7YblTnr7gqDBB3x+cKX4U1sx/7TGkuqLao2J/LWK+PxsAR+RhzqeKAhFsUL7m8nuqtkTzAcLov3/XnLG6X5n1GBuN8xwEdTyvsO/3q7IT5eJSDlK6c8d09619W7yhsmT5kuoVpF7SNyjWKi3DN2QDxcXjNYon1XuIDzvcZl3fYdPZSMXGF0fEOWxvlIYXHDP8kcZPYtYt/h2t97XX5yU2Ynzu7dvbeagOmV7bwSPJaZ58kFzpN3+lI58tYU7i+UnffJBck9eqWHMByTWcfpneYb7ucq3Bz/svqaew1uPqM3XsEK4bLln7CSK6pvq/yKsY34w8VA67fU+2a5gv2nOWrkT51dw5zdG8/8SfFG12NpLiqxoXiKhYDLLe4z5X4asUaMf+N89jRejThcsVTjLeS91cx0+XnEb6Y4Y0jfR+/d9q/ZHyiOETVCq5OZnnC2X8WG+f7e5yVJbWm052jtjrB7PB25wjudcoOo7gz/qmP13Ob9fxgxjZJTa84gtVczjYddkrbYJ/N1R6ufkh9PT0vrNjjfDdr64w+Vf38JtarP7r+cdXwTNO7+6ueX/d5WL2XxsAMzz/MqOeabuxR5yA/IQep+qGLPawBkv63itFR/knxr+c3FW/sbTtbuJ5Mx7ErRmgD9lp1z073Jrir16/rM3m265Uizgr/+riLAfRB11dOORzxT2uDLZo45R2FLesj4B6Gt/J1PGNmMeA4XeU4990VN7CeM7MPW2Mx1fUKHe7PJetDsz0p5+NvvDoeSuK588OunmX5gc1OE6kYGeGdvfhfxQDaxOHvcmLHBypelO5R/t1xiaqfZ3mnywEj+DPsEW/2ewvHQ0k+7fSoihPn+4n9lead0Tszvc6q85XucfZQsdD1mB1PMA5muOM+5svq/Z1t9uIdlXPrc8SXcRD+xqirByoPJb0ExRldrsB9Xe2R1Ndb9E69lvbi6u8lcCg/r79z6WqCTnOiz7HaU11Xvq1q8rTvl2CfnLUkHKR0j+L99Tqzm8oFKRcrvnHc7+6l1ljMzeidPc5bqu6pHMNiomLO/J69hvFyoo9OYl3ZgmGrbMvy9KjecX3NEQ2k/B3xZZqH5YREDyU84PzV5QzWW+tiZFTv1HrrfflZf7nf77D+A/o2w7D6PdZhrH5I6zKlTV0/YqTX1OmfI3hH/X5W1b9K/+A1xLvqI2W3ri5j3MzydsWJ5VJliy5HbOWdZxkVe8dBeP5SuR8xZRyE/s/6EgkPOd5R+HbcpWy6B+90Oif5D6M6f0l6b4i/ygEzPOTwSfePjD37O1vO15WGwf/2KY5itkjqMsbD+LzTTQm3Kz0029/Zkh8S/BXPOK2v+qJpn5rxA+tHuOd41sDugXXbEdiPxkKq490e/A9mdz3RQzOcknBb5Z2qtfe2wx7+3+GPMeB0q+Mhdg7i+spb5np//Ex/YYcE2yQGHNZdDLAeUHemsmVm2KMdcP5N/FMOSsee9/rLcYQd/gFAEVH2AEgAAA==
   </data>
  </layer>
-
- <objectgroup name="Objects" width="96" height="48">
+ <layer name="Highlighted" width="96" height="48">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAAO3OMQEAAAwCIAusf93F8BASkAAAAAAAAAAAAAAAAAAAAAAAsOjagXEPhg3qPgBIAAA=
+  </data>
+ </layer>
+ <objectgroup name="Objects" width="0" height="0">
   <object name="MapCenter" x="2034" y="1536" width="48" height="64"/>
-  <object name="PloygonSample" x="258" y="192">
-   <polyline points="0,0 61,-65 149,-65 158,28 91,95 0,96 -2,2"/>
-  </object>
+  <object name="PloygonSample" x="258" y="192"/>
+  <object name="Object" x="2432" y="1472" width="64" height="64"/>
+  <object name="Object" x="2560" y="1472" width="64" height="64"/>
+  <object name="Object" x="0" y="3008" width="64" height="64"/>
  </objectgroup>
- </map>
+</map>

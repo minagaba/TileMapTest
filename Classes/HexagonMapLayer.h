@@ -37,6 +37,7 @@ private:
 
 	CCTMXTiledMap *m_pTiledMap;
 	CCTMXLayer	  *m_pBackgroundLayer;
+	CCTMXLayer	  *m_pHighlitedLayer;
 
 	CCSpriteBatchNode *m_pAnimatedDude;
 	CCSprite          *m_pDudeSprite;

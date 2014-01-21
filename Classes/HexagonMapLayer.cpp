@@ -37,6 +37,12 @@ bool HexagonMapLayer::init()
 		return false;
 	}
 
+	m_pHighlitedLayer = m_pTiledMap->layerNamed("Highlighted");
+	if (!m_pHighlitedLayer)
+	{
+		return false;
+	}
+	
 	this->addChild(m_pTiledMap);
 
 	CCTMXObjectGroup *objectGroup = m_pTiledMap->objectGroupNamed("Objects");
