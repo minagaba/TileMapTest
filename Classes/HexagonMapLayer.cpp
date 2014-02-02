@@ -2,6 +2,8 @@
 
 #define HEXAGON_MAPS_WIDTH_FACTOR 0.75f
 
+//#define TILE_BOUNDING_BOX_ON_CLICK
+
 #define LOG_CCPOINT(arg) CCLOG(#arg": [%f, %f]", arg.x, arg.y)
 #define LOG_FLOAT(arg)   CCLOG(#arg": %f", arg)
 
@@ -43,6 +45,9 @@ bool HexagonMapLayer::init()
 		return false;
 	}
 	
+	m_selectedTile = ccp(0,0);
+	m_selectedTileGid = m_pHighlitedLayer->tileGIDAt(m_selectedTile);
+
 	this->addChild(m_pTiledMap);
 
 	CCTMXObjectGroup *objectGroup = m_pTiledMap->objectGroupNamed("Objects");
@@ -151,12 +156,7 @@ CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 	CCPoint left = ccp(0, touchLocation.y);
 	CCPoint right = ccp(mapSize.width, touchLocation.y);
 	ccColor4F touchLocationColor = ccc4f(1.0f, 0.0f, 0.0f, 1.0f);
-	m_pDrawNode->clear();
-	m_pDrawNode->drawSegment(top, bottom, 2.0f, touchLocationColor);
-	m_pDrawNode->drawSegment(left, right, 2.0f, touchLocationColor);
 
-	ccColor4F gridColor = ccc4f(0.0f, 0.0f, 1.0f, 1.0f);
-	float gridLeft, gridRight, gridUp, gridBottom;
 	int col, row;
 	col = (int)((touchLocation.x - tileSize.width/8) / (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR));
 	if (col & 1) 
@@ -167,6 +167,15 @@ CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 	}
 	CCLOG("col=%d", col);
 	CCLOG("row=%d", row);
+
+#ifdef TILE_BOUNDING_BOX_ON_CLICK
+	m_pDrawNode->clear();
+	m_pDrawNode->drawSegment(top, bottom, 2.0f, touchLocationColor);
+	m_pDrawNode->drawSegment(left, right, 2.0f, touchLocationColor);
+
+	ccColor4F gridColor = ccc4f(0.0f, 0.0f, 1.0f, 1.0f);
+	float gridLeft, gridRight, gridUp, gridBottom;
+
 	gridLeft = col * (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR) + (tileSize.width / 8);
 	//gridRight = gridLeft + (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR);
 	gridRight = gridLeft + tileSize.width - (tileSize.width / 4);
@@ -181,7 +190,13 @@ CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 	m_pDrawNode->drawSegment(ccp(gridRight, gridBottom), ccp(gridRight, gridUp), 2.0f, gridColor);
 	m_pDrawNode->drawSegment(ccp(gridLeft, gridBottom), ccp(gridRight, gridBottom), 2.0f, gridColor);
 	m_pDrawNode->drawSegment(ccp(gridLeft, gridUp), ccp(gridRight, gridUp), 2.0f, gridColor);
+#endif // TILE_BOUNDING_BOX_ON_CLICK
 
+	if (col & 1) {
+		row = m_pTiledMap->getMapSize().height - (row + 2);
+	} else {
+		row = m_pTiledMap->getMapSize().height - (row + 1);
+	}
 
 	CCPoint coords = ccp(col, row);
 
@@ -190,41 +205,16 @@ CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 
 void HexagonMapLayer::ccTouchEnded(CCTouch *touch, CCEvent *event)
 {
-	getMapCoordsFromTouch(touch);
-	return;
-    CCPoint touchLocation = touch->getLocationInView();
-    touchLocation = CCDirector::sharedDirector()->convertToGL(touchLocation);
-    //touchLocation = this->convertToNodeSpace(touchLocation);
-	touchLocation = m_pTiledMap->convertToNodeSpace(touchLocation);
-	pixelToHexagonGrid(touchLocation);
- 
-	CCPoint playerPos = m_pAnimatedDude->getPosition();
-    CCPoint diff = ccpSub(touchLocation, playerPos);
- 
-    if ( abs(diff.x) > abs(diff.y) ) {
-        if (diff.x > 0) {
-            playerPos.x += m_pTiledMap->getTileSize().width;
-        } else {
-            playerPos.x -= m_pTiledMap->getTileSize().width;
-        }
-    } else {
-        if (diff.y > 0) {
-            playerPos.y += m_pTiledMap->getTileSize().height;
-        } else {
-            playerPos.y -= m_pTiledMap->getTileSize().height;
-        }
-    }
- 
-    // safety check on the bounds of the map
-    if (playerPos.x <= (m_pTiledMap->getMapSize().width * m_pTiledMap->getTileSize().width) &&
-        playerPos.y <= (m_pTiledMap->getMapSize().height * m_pTiledMap->getTileSize().height) &&
-        playerPos.y >= 0 &&
-        playerPos.x >= 0 )
-    {
-        this->setDudePosition(playerPos);
-    }
- 
-    this->setViewPointCenter(m_pAnimatedDude->getPosition());
+	CCPoint coords = getMapCoordsFromTouch(touch);
+	
+	// TODO: validate that the coordinate is within the selectable boundries (within the hexagon).
+
+	// remove the last highlighted tile
+	m_pHighlitedLayer->removeTileAt(m_selectedTile);
+
+	// highlight the newly selected tile
+	m_selectedTile = coords;
+	m_pHighlitedLayer->setTileGID(m_selectedTileGid, m_selectedTile);
 }
 
 void HexagonMapLayer::ccTouchMoved(CCTouch *touch, CCEvent *event)

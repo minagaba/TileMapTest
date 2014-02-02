@@ -15,7 +15,7 @@
  </layer>
  <layer name="Highlighted" width="96" height="48">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAAO3OMQEAAAwCIAusf93F8BASkAAAAAAAAAAAAAAAAAAAAAAAsOjagXEPhg3qPgBIAAA=
+   H4sIAAAAAAAAAO3BIQEAAAACIA/4/64vTEADAAAAAAAAAAAAAAAAAAAAAAC8DRK62uwASAAA
   </data>
  </layer>
  <objectgroup name="Objects" width="0" height="0">

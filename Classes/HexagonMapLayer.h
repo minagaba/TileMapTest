@@ -45,6 +45,9 @@ private:
 	float          m_fScaleFactor;
 
 	CCDrawNode    *m_pDrawNode;
+
+	unsigned int   m_selectedTileGid;
+	CCPoint        m_selectedTile;
 };
 
 #endif // __HEXAGONMAPLAYER_H__
