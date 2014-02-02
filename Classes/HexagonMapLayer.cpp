@@ -140,6 +140,49 @@ bool HexagonMapLayer::ccTouchBegan(CCTouch *touch, CCEvent *event)
     return true;
 }
 
+void HexagonMapLayer::drawCrossOnLocation(CCPoint location)
+{
+	CCSize mapSize = m_pTiledMap->getContentSize();
+	ccColor4F crossColor = ccc4f(1.0f, 0.0f, 0.0f, 1.0f); // red
+	CCPoint top = ccp(location.x, mapSize.height);
+	CCPoint bottom = ccp(location.x, 0);
+	CCPoint left = ccp(0, location.y);
+	CCPoint right = ccp(mapSize.width, location.y);
+
+	m_pDrawNode->clear();
+	m_pDrawNode->drawSegment(top, bottom, 2.0f, crossColor);
+	m_pDrawNode->drawSegment(left, right, 2.0f, crossColor);
+}
+
+CCPoint HexagonMapLayer::mapCoordsToLayer(CCPoint coords)
+{
+	float x, y;
+	int col = coords.x;
+	int row = coords.y;
+	CCSize tileSize = m_pTiledMap->getTileSize();
+
+	x = col * tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR + tileSize.width/8;
+	x += HEXAGON_MAPS_WIDTH_FACTOR * tileSize.width/2;
+	if (col & 1) {
+		row = m_pTiledMap->getMapSize().height - row - 2;
+		y = row * tileSize.height;
+		y += tileSize.height/2;
+	} else {
+		row = m_pTiledMap->getMapSize().height - row - 1;
+		y = row * tileSize.height;
+	}
+	y += tileSize.height/2;
+
+	CCPoint point = ccp(x,y);
+	drawCrossOnLocation(point);
+	return point;
+}
+
+CCPoint HexagonMapLayer::touchToMapCoords(CCTouch *touch)
+{
+	return getMapCoordsFromTouch(touch);
+}
+
 CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 {
 	CCPoint touchLocation = touch->getLocationInView();
@@ -150,12 +193,6 @@ CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 
 	CCSize tileSize = m_pTiledMap->getTileSize();
 	CCSize mapSize = m_pTiledMap->getContentSize();
-
-	CCPoint top = ccp(touchLocation.x, mapSize.height);
-	CCPoint bottom = ccp(touchLocation.x, 0);
-	CCPoint left = ccp(0, touchLocation.y);
-	CCPoint right = ccp(mapSize.width, touchLocation.y);
-	ccColor4F touchLocationColor = ccc4f(1.0f, 0.0f, 0.0f, 1.0f);
 
 	int col, row;
 	col = (int)((touchLocation.x - tileSize.width/8) / (tileSize.width * HEXAGON_MAPS_WIDTH_FACTOR));
@@ -169,6 +206,12 @@ CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 	CCLOG("row=%d", row);
 
 #ifdef TILE_BOUNDING_BOX_ON_CLICK
+	CCPoint top = ccp(touchLocation.x, mapSize.height);
+	CCPoint bottom = ccp(touchLocation.x, 0);
+	CCPoint left = ccp(0, touchLocation.y);
+	CCPoint right = ccp(mapSize.width, touchLocation.y);
+	ccColor4F touchLocationColor = ccc4f(1.0f, 0.0f, 0.0f, 1.0f);
+
 	m_pDrawNode->clear();
 	m_pDrawNode->drawSegment(top, bottom, 2.0f, touchLocationColor);
 	m_pDrawNode->drawSegment(left, right, 2.0f, touchLocationColor);
@@ -193,9 +236,9 @@ CCPoint HexagonMapLayer::getMapCoordsFromTouch(CCTouch *touch)
 #endif // TILE_BOUNDING_BOX_ON_CLICK
 
 	if (col & 1) {
-		row = m_pTiledMap->getMapSize().height - (row + 2);
+		row = m_pTiledMap->getMapSize().height - row - 2;
 	} else {
-		row = m_pTiledMap->getMapSize().height - (row + 1);
+		row = m_pTiledMap->getMapSize().height - row - 1;
 	}
 
 	CCPoint coords = ccp(col, row);
@@ -215,6 +258,8 @@ void HexagonMapLayer::ccTouchEnded(CCTouch *touch, CCEvent *event)
 	// highlight the newly selected tile
 	m_selectedTile = coords;
 	m_pHighlitedLayer->setTileGID(m_selectedTileGid, m_selectedTile);
+
+	CCPoint point = mapCoordsToLayer(coords);
 }
 
 void HexagonMapLayer::ccTouchMoved(CCTouch *touch, CCEvent *event)

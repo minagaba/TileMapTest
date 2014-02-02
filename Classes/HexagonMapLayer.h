@@ -29,11 +29,17 @@ private:
 	void setViewPointCenter(CCPoint position);
 	void setDudePosition(CCPoint position);
 	CCPoint getMapCoordsFromTouch(CCTouch *touch);
+	CCPoint touchToMapCoords(CCTouch *touch);
+	CCPoint mapCoordsToLayer(CCPoint coords);
 
 	CCPoint pixelToHexagonGrid(CCPoint p);
 	//void highlightTile(CCPoint position);
 	void moveMapView(CCPoint diff);
 	void fixMapPosition();
+
+
+	// debug methods
+	void drawCrossOnLocation(CCPoint location);
 
 	CCTMXTiledMap *m_pTiledMap;
 	CCTMXLayer	  *m_pBackgroundLayer;
